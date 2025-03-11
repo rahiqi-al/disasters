@@ -1,0 +1,11 @@
+INGESTION:
+  DATASETS: [
+    "mexwell/significant-volcanic-eruption-database",
+    "harshalhonde/tsunami-events-dataset-1900-present",
+    "kazushiadachi/global-landslide-data",
+    "jacopoferretti/big-eartquakes-1900-1999-dataset",
+    "joebeachcapital/earthquakes",
+    "elmadafri/the-wildfire-dataset",
+    "sudhanshu432/algerian-forest-fires-cleaned-dataset"]
+  BUCKET: lake
+  BRONZE: bronze/

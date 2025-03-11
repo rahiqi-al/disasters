@@ -9,7 +9,15 @@ class Config :
     with open('batch/batchConfig/config.yml','r') as file:
         config_data = yaml.load(file , Loader=yaml.FullLoader)
 
+        datasets = config_data["INGESTION"]['DATASETS']
+        bucket_name = config_data["INGESTION"]['BUCKET']
+        bronze_prefix = config_data["INGESTION"]['BRONZE']
 
+
+
+
+        access_key = os.getenv('ACCESS_KEY')
+        secret_key = os.getenv('SECRET_KEY')
 
 
 
@@ -17,4 +25,4 @@ class Config :
 
 
 config = Config()    
-#print(config.ali)
+#print(config.access)
