@@ -6,7 +6,7 @@ from datetime import datetime , timedelta
 import os 
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.ingestion import ingestion
+from scripts.ingestion import ingestion 
 from batchConfig.config import config
 
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename="logs/app.log",filemode='a')
