@@ -8,6 +8,8 @@ services:
     environment:
       - NESSIE_CATALOG_DEFAULT_WAREHOUSE=minio
     restart: unless-stopped
+    networks:
+      - projet_network
 
   dremio:
     image: dremio/dremio-oss:latest
@@ -22,6 +24,8 @@ services:
     volumes:
       - dremio_data:/opt/dremio/data
     restart: unless-stopped
+    networks:
+      - projet_network
 
   minio:
     image: minio/minio:latest
@@ -36,12 +40,14 @@ services:
       - MINIO_ROOT_PASSWORD=aliali123
     command: server /data --console-address ":9001"
     restart: unless-stopped
+    networks:
+      - projet_network
 
   postgres:
-    image: postgres:latest
+    image: postgres:13
     container_name: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -49,6 +55,8 @@ services:
       - POSTGRES_PASSWORD=airflow
       - POSTGRES_DB=airflow
     restart: unless-stopped
+    networks:
+      - projet_network
 
   mongodb:
     image: mongo:latest
@@ -60,6 +68,8 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=disaster
     restart: unless-stopped
+    networks:
+      - projet_network
 
   cassandra:
     image: cassandra:latest
@@ -71,6 +81,115 @@ services:
     environment:
       - CASSANDRA_CLUSTER_NAME=disaster
     restart: unless-stopped
+    networks:
+      - projet_network
+
+  airflow:
+    image: apache/airflow:2.8.1
+    container_name: airflow
+    user: "0"
+    depends_on:
+      - postgres
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - PYTHONPATH=/project
+    ports:
+      - "8080:8080"
+    volumes:
+      - airflow-libs:/home/airflow/.local/lib/python3.8/site-packages  # Named volume for libraries
+      - /home/ali/.kaggle/kaggle.json:/root/.config/kaggle/kaggle.json
+      - .:/project
+      - ./batch/dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - /var/run/docker.sock:/var/run/docker.sock  # Add this line
+    command: bash -c "sleep 60; echo 'Starting Airflow setup...'; while ! nc -z postgres 5432; do sleep 1; echo 'Waiting for Postgres...'; done; echo 'Postgres ready, running db init...'; airflow db init && echo 'DB initialized, creating user...'; airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin && echo 'User created, starting services...'; airflow webserver & airflow scheduler"
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2181"
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+  spark-master:
+    image: bitnami/spark:3.5.1
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
+      - PYTHONPATH=/project  # Enable imports from /project/config
+    ports:
+      - "7077:7077"
+      - "8081:8080"  # UI on 8081 to avoid Airflow conflict
+    volumes:
+      - .:/project  # Mount entire project directory
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+  spark-worker-1:
+    image: bitnami/spark:3.5.1
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - PYTHONPATH=/project  # Enable imports from /project/config
+    depends_on:
+      - spark-master
+    volumes:
+      - .:/project  # Mount entire project directory
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+  spark-worker-2:
+    image: bitnami/spark:3.5.1
+    container_name: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - PYTHONPATH=/project  # Enable imports from /project/config
+    depends_on:
+      - spark-master
+    volumes:
+      - .:/project  # Mount entire project directory
+    restart: unless-stopped
+    networks:
+      - projet_network
+
+networks:
+  projet_network:
+    driver: bridge
 
 volumes:
   minio_data:
@@ -78,3 +197,5 @@ volumes:
   mongodb_data:
   cassandra_data:
   dremio_data:
+  logs:
+  airflow-libs:  

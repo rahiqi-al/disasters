@@ -2,14 +2,10 @@ import logging
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime , timedelta
+from batch.scripts.ingestion import ingestion 
+from batch.batchConfig.config import config
 
-import os 
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.ingestion import ingestion 
-from batchConfig.config import config
-
-logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename="logs/app.log",filemode='a')
+logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename="/opt/airflow/logs/app.log",filemode='a')
 logger=logging.getLogger(__name__)
 
 args={ 

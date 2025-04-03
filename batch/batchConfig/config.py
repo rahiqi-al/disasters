@@ -6,7 +6,7 @@ load_dotenv()
 
 
 class Config :
-    with open('batch/batchConfig/config.yml','r') as file:
+    with open('/project/batch/batchConfig/config.yml','r') as file:
         config_data = yaml.load(file , Loader=yaml.FullLoader)
 
         datasets = config_data["INGESTION"]['DATASETS']

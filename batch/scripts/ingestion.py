@@ -1,12 +1,10 @@
-import sys ,os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from batchConfig.config import config
+from batch.batchConfig.config import config
 from kaggle.api.kaggle_api_extended import KaggleApi
 from minio import Minio
 import tempfile
 import logging
 from minio.error import MinioException
-
+import os,sys
 logger=logging.getLogger(__name__)
 
 
@@ -25,7 +23,7 @@ def ingestion(dataset):
 
 
         logger.info(f'authentification successful for {dataset}')
-        minio_client = Minio("localhost:9000", access_key="t4vcJSaVjhQCzdYGyaRT", secret_key="9y9CxSkjnmIaXSVyElEEK4FpTvaaliUvYfjdZAck", secure=False)
+        minio_client = Minio("minio:9000", access_key="rJPe0evFgnFb2SgK18xA", secret_key="T5YVbxm30sHqTOmxoApyVe0zLpS3ZklcivJNi6x3", secure=False)
 
         logger.info('checking the status of the bucket')
 
