@@ -5,7 +5,7 @@ INGESTION:
     "kazushiadachi/global-landslide-data",
     "jacopoferretti/big-eartquakes-1900-1999-dataset",
     "joebeachcapital/earthquakes",
-    "elmadafri/the-wildfire-dataset",
+    "brsdincer/wildfire-detection-image-data",
     "sudhanshu432/algerian-forest-fires-cleaned-dataset"]
   BUCKET: lake
   BRONZE: bronze/
