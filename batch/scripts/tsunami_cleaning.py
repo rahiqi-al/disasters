@@ -177,7 +177,7 @@ try :
     spark.sql("CREATE NAMESPACE IF NOT EXISTS nessie.silver")
     
     logger.info("Writing tsunami data to Iceberg table nessie.silver.df_tsunami")
-
+    spark.sql("DROP TABLE IF EXISTS nessie.silver.df_tsunami")
     df_tsunami.write.format("iceberg").mode("overwrite").saveAsTable("nessie.silver.df_tsunami")
     logger.info("tsunami data successfully written to Iceberg table")
 

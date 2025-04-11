@@ -249,7 +249,7 @@ try :
     spark.sql("CREATE NAMESPACE IF NOT EXISTS nessie.silver")
     
     logger.info("Writing volcano data to Iceberg table nessie.silver.df_volcano")
-
+    spark.sql("DROP TABLE IF EXISTS nessie.silver.df_volcano")
     df_volcano.write.format("iceberg").mode("overwrite").saveAsTable("nessie.silver.df_volcano")
     logger.info("volcano data successfully written to Iceberg table")
 

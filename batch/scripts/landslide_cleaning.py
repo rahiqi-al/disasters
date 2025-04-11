@@ -154,7 +154,7 @@ try :
     spark.sql("CREATE NAMESPACE IF NOT EXISTS nessie.silver")
     
     logger.info("Writing landslide data to Iceberg table nessie.silver.df_landslide")
-
+    spark.sql("DROP TABLE IF EXISTS nessie.silver.df_landslide")
     df_landslide.write.format("iceberg").mode("overwrite").saveAsTable("nessie.silver.df_landslide")
     logger.info("landslide data successfully written to Iceberg table")
 

@@ -54,14 +54,32 @@ The issue in earthquake_cleaning.py happens because you previously saved df_eart
 but the metadata file is missing in Minio (e.g., deleted or not written). When you overwrite it, Nessie tries to read the old metadata first, fails, and throws a NotFoundException.
 In landslide_cleaning.py, you didn’t save df_landslide as an Iceberg table before, so it starts fresh with no metadata conflict.
 Adding .option("path", ...) or dropping the old table fixes df_earthquake by resetting its location or state. It’s a mismatch between Nessie’s catalog and Minio’s files specific to df_earthquake.
+the same probleme would happend to droping the table cause neesie whould needs the metadata 
 
-
-Best Solution
+Best Solution:
 Add this line to earthquake_cleaning.py before saveAsTableAdd this line to earthquake_cleaning.py before saveAsTable
 
 spark.sql("DROP TABLE IF EXISTS nessie.silver.df_earthquake")"
 
 or
 
+to slove this just do this curl -X DELETE "<nessie-url>/trees/main/contents/silver.df_landslide"
+
+or 
+
+also use PURGE ensures the table and its metadata are fully removed from Nessie’s catalog, bypassing the missing file issue
+
+or 
+
 'If you didn’t manually remove the table, .mode("overwrite") in saveAsTable should overwrite it'
 """
+
+"""
+the dependecies probleme might be:
+A transient network disruption, such as connectivity instability or server latency, prevented Spark from retrieving a critical 41MB dependency(like a shaky internet connection or server glitch)
+"""
+
+
+spark_submit:
+-spark-submit --packages com.amazon.deequ:deequ:2.0.7-spark-3.5 installs the Deequ JAR in the cluster.
+-In the session, .config("spark.jars.packages", "com.amazon.deequ:deequ:2.0.7-spark-3.5") specifies it’s used there.

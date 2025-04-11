@@ -45,9 +45,16 @@ with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule
     task_ld = BashOperator(
     task_id='test4',
     bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0 /project/batch/scripts/landslide_cleaning.py')
+    f_d = BashOperator(
+    task_id='f_d',
+    bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0 /project/batch/scripts/galaxy_schema_modeling.py')
+    quality = BashOperator(
+    task_id='quality',
+    bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0,com.amazon.deequ:deequ:2.0.7-spark-3.5 /project/batch/Data-quality/data_quality_check.py')
+      
 
 
-    [task_ea,task_v,task_t,task_ld]>>kaggle_sensor>>ingestion_tasks>>success>>spark_task
+    [task_ea,task_v,task_t,task_ld]>>f_d>>quality>>kaggle_sensor>>ingestion_tasks>>success>>spark_task
 
 
     

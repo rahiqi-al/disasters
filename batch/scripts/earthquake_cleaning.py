@@ -132,7 +132,7 @@ try :
     spark.sql("CREATE NAMESPACE IF NOT EXISTS nessie.silver")
     
     logger.info("Writing earthquake data to Iceberg table nessie.silver.df_earthquake")
-
+    spark.sql("DROP TABLE IF EXISTS nessie.silver.df_earthquake")
     df_eartqueke.write.format("iceberg").mode("overwrite").saveAsTable("nessie.silver.df_earthquake")
     logger.info("Earthquake data successfully written to Iceberg table")
 
