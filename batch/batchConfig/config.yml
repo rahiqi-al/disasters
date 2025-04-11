@@ -9,3 +9,15 @@ INGESTION:
     "sudhanshu432/algerian-forest-fires-cleaned-dataset"]
   BUCKET: lake
   BRONZE: bronze/
+
+CLEANING:
+  SELECTED_COLUMNS_TS : ['`Sr.no`', 'Year', 'Mo', 'Dy', 'Hr', 'Mn', 'Country', 'LocationNanName', 'Latitude', 'Longitude',  'DeathNanDescription', 'InjuriesNanDescription',  'TotalNanDeaths', 'TotalNanInjuries', 'TsunamiNanEventNanValidity', 'TsunamiNanCauseNanCode', 'TotalNanHousesNanDestroyed', 'TotalNanHousesNanDamaged']
+  NEW_COLUMN_NAME_TS : ['id', 'Year', 'Mo', 'Dy', 'Hr', 'Mn', 'Country', 'Location', 'Latitude', 'Longitude',  'Death Description',  'Injuries Description', 'Total Deaths', 'Total Injuries', 'Tsunami Event Validity', 'Tsunami Cause Code', 'Total Houses Destroyed', 'Total Houses Damaged']
+  SELECTED_COLUMNS_LD : [
+    'event_id', 'event_date', 'landslide_category', 'landslide_trigger',
+    'landslide_size', 'landslide_setting', 'fatality_count', 'injury_count',
+    'country_name',   'longitude', 'latitude']
+  COLUMNS_TO_FILL_LD : ["landslide_category", "landslide_trigger", "landslide_size", "landslide_setting"]
+  SELECTED_COLUMNS_V : ['Year','Month','Day','Volcano Name','Country','Elevation','Volcano Type','Status','Volcanic Explosivity Index','Volcano : Deaths Description','Total Effects : Deaths','Coordinates']
+
+   

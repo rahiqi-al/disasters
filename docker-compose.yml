@@ -149,6 +149,7 @@ services:
       - "8081:8080"  # UI on 8081 to avoid Airflow conflict
     volumes:
       - .:/project  # Mount entire project directory
+      - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Shared package volume
     restart: unless-stopped
     networks:
       - projet_network
@@ -166,6 +167,7 @@ services:
       - spark-master
     volumes:
       - .:/project  # Mount entire project directory
+      - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Same volume
     restart: unless-stopped
     networks:
       - projet_network
@@ -183,6 +185,7 @@ services:
       - spark-master
     volumes:
       - .:/project  # Mount entire project directory
+      - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Same volume
     restart: unless-stopped
     networks:
       - projet_network
@@ -199,3 +202,4 @@ volumes:
   dremio_data:
   logs:
   airflow-libs:  
+  spark-libs:  # New named volume for Spark packages

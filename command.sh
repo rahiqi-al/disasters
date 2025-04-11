@@ -30,3 +30,38 @@ spark : http://localhost:8081/
 airflow : http://localhost:8080/home
 dremio : http://localhost:9047/
 minio : http://localhost:9001/
+
+
+# since we used shared volumes no need to install in all of them just one is enough cause it will be mounted to all of them
+"""
+docker exec -it --user root spark-master bash
+/opt/bitnami/python/bin/pip3 install python-dotenv
+/opt/bitnami/python/bin/pip3 install PyYAML
+docker exec -it --user root spark-worker-1 bash
+/opt/bitnami/python/bin/pip3 install python-dotenv
+/opt/bitnami/python/bin/pip3 install PyYAML
+docker exec -it --user root spark-worker-2 bash
+/opt/bitnami/python/bin/pip3 install python-dotenv
+/opt/bitnami/python/bin/pip3 install PyYAML
+"""
+
+
+docker-compose restart spark-master spark-worker-1 spark-worker-2
+
+
+"""
+The issue in earthquake_cleaning.py happens because you previously saved df_earthquake as an Iceberg table with Nessie, which created a metadata reference, 
+but the metadata file is missing in Minio (e.g., deleted or not written). When you overwrite it, Nessie tries to read the old metadata first, fails, and throws a NotFoundException.
+In landslide_cleaning.py, you didn’t save df_landslide as an Iceberg table before, so it starts fresh with no metadata conflict.
+Adding .option("path", ...) or dropping the old table fixes df_earthquake by resetting its location or state. It’s a mismatch between Nessie’s catalog and Minio’s files specific to df_earthquake.
+
+
+Best Solution
+Add this line to earthquake_cleaning.py before saveAsTableAdd this line to earthquake_cleaning.py before saveAsTable
+
+spark.sql("DROP TABLE IF EXISTS nessie.silver.df_earthquake")"
+
+or
+
+'If you didn’t manually remove the table, .mode("overwrite") in saveAsTable should overwrite it'
+"""
