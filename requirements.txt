@@ -105,10 +105,12 @@ propcache==0.3.0
 protobuf==5.29.3
 psutil==7.0.0
 psycopg2-binary==2.9.10
+py4j==0.10.9.7
 pycparser==2.22
 pycryptodome==3.21.0
 Pygments==2.19.1
 PyJWT==2.10.1
+pyspark==3.5.1
 python-daemon==3.1.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
