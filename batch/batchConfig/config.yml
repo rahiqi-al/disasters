@@ -20,4 +20,11 @@ CLEANING:
   COLUMNS_TO_FILL_LD : ["landslide_category", "landslide_trigger", "landslide_size", "landslide_setting"]
   SELECTED_COLUMNS_V : ['Year','Month','Day','Volcano Name','Country','Elevation','Volcano Type','Status','Volcanic Explosivity Index','Volcano : Deaths Description','Total Effects : Deaths','Coordinates']
 
-   
+MODELS:
+  CNN:
+    BUCKET_NAME: "lake"
+    BASE_PATH: "bronze/wildfire-detection-image-data/forest_fire"
+  REGRESSION:
+    BUCKET_NAME: "lake"
+    CSV_PATH: "bronze/algerian-forest-fires-cleaned-dataset/Algerian_forest_fires_cleaned_dataset.csv"
+    ARTIFACT_BUCKET: "mlflow"

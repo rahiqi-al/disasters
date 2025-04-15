@@ -98,6 +98,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
+      - airflow_mlflow:/mlflow/mlruns  # Named volume
       - airflow-libs:/home/airflow/.local/lib/python3.8/site-packages  # Named volume for libraries
       - /home/ali/.kaggle/kaggle.json:/root/.config/kaggle/kaggle.json
       - .:/project
@@ -190,6 +191,22 @@ services:
     networks:
       - projet_network
 
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=aliali123
+      - SQLALCHEMY_DATABASE_URI=sqlite:////app/superset_home/superset.db
+    volumes:
+      - superset_data:/app/superset_home
+    depends_on:
+      - dremio
+    restart: unless-stopped
+    networks:
+      - projet_network
+
 networks:
   projet_network:
     driver: bridge
@@ -202,4 +219,6 @@ volumes:
   dremio_data:
   logs:
   airflow-libs:  
-  spark-libs:  # New named volume for Spark packages
+  spark-libs:  # New  volume for Spark packages
+  airflow_mlflow:  
+  superset_data:

@@ -19,6 +19,14 @@ class Config :
         selected_columns_v = config_data["CLEANING"]['SELECTED_COLUMNS_V']
 
 
+        bucket_name_regression = config_data["MODELS"]['REGRESSION']['BUCKET_NAME']
+        csv_path_regression = config_data["MODELS"]['REGRESSION']['CSV_PATH']
+        artifact_bucket_regression = config_data["MODELS"]['REGRESSION']['ARTIFACT_BUCKET']
+
+
+
+        bucket_name_cnn = config_data["MODELS"]['CNN']['BUCKET_NAME']
+        base_path_cnn = config_data["MODELS"]['CNN']['BASE_PATH']
 
 
 

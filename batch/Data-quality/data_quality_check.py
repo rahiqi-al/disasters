@@ -1,5 +1,6 @@
 import pyspark
 from pyspark.sql import SparkSession
+import sys
 import os
 os.environ["SPARK_VERSION"] = "3.5"  # Match your Spark version (e.g., 3.2, 3.3) 
 import pydeequ
@@ -244,17 +245,21 @@ try :
         raise ValueError("Data quality check failed")
     
 
+    all_results_df.show(3)
     logger.info('Tests are successfull')
-
-    
+        
 
 
 except Exception as e:
     logger.exception(f"Data quality validation failed with error: {e}")
+    raise
 
-finally :
-    logger.info("Spark session stopped")
-    spark.stop()
-
-
+finally:
+    logger.info("Stopping Spark session")
+    spark.catalog.clearCache()  # Clear PyDeequ caches
+    spark.sparkContext.stop()  # Stop SparkContext
+    spark.stop()  # Stop SparkSession
+    spark.sparkContext._gateway.shutdown()  # Shutdown JVM gateway after Spark stop
+    logger.info("Spark session stopped successfully")
+    #os._exit(0)
     
