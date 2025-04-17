@@ -9,6 +9,8 @@ from batch.scripts.check_kaggle import check_kaggle_api
 from batch.batchConfig.config import config
 from batch.scripts.regression_model import train_and_track_model 
 from batch.scripts.cnn_model import cnn_model 
+from stream.producer import producer
+from airflow.providers.amazon.aws.sensors.s3 import S3KeySensor
 
 logging.basicConfig(level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',filename="/opt/airflow/logs/app.log",filemode='a')
 logger=logging.getLogger(__name__)
@@ -16,7 +18,7 @@ logger=logging.getLogger(__name__)
 args={ 
     'owner': 'ali rahiqi',
     'depends_on_past': False,
-    'retries': 1,
+    'retries': 3,
     'execution_timeout': timedelta(hours=1),
     'retry_delay': timedelta(minutes=3)}
 
@@ -31,7 +33,7 @@ def check_success():
 with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule_interval='@yearly', catchup=False ,on_failure_callback=on_failure_callback) as dag :
     check_kaggle_api = PythonSensor(task_id='check_kaggle_api', python_callable=check_kaggle_api, poke_interval=60, timeout=600)
     #ingestion_tasks = [PythonOperator(task_id=f"ingest--{dataset.replace('/', '-')}", python_callable=ingestion, op_kwargs={"dataset": dataset}) for dataset in config.datasets ]
-    success = PythonOperator(task_id='success', python_callable=check_success)
+    #success = PythonOperator(task_id='success', python_callable=check_success)
     #spark_task = BashOperator(task_id='spark_test_task',bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0  /project/batch/scripts/test.py')
     eartquake_cleaning = BashOperator(task_id='eartquake_cleaning',bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0  /project/batch/scripts/earthquake_cleaning.py')
     volcano_cleaning = BashOperator(task_id='volcano_cleaning',bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0  /project/batch/scripts/volcano_cleaning.py')
@@ -48,12 +50,17 @@ with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule
             op_kwargs={"dataset": dataset}
         ) for dataset in config.datasets
     }
+    producer_task = PythonOperator(task_id='producer_task', python_callable=producer)
 
+    consumer_task = BashOperator(task_id='consumer_task',bash_command='docker exec spark-master spark-submit --master spark://spark-master:7077 --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /project/stream/consumer.py')
+
+
+    check_mlflow_bucket = S3KeySensor(task_id='check_mlflow_bucket',bucket_key='*',bucket_name='mlflow', aws_conn_id='minio_conn',wildcard_match=True,poke_interval=30,timeout=300,)
 
 
 
     check_kaggle_api>>list(ingestion_tasks.values())
-    ingestion_tasks["ingest--joebeachcapital-earthquakes"] >> eartquake_cleaning
+    [ingestion_tasks["ingest--joebeachcapital-earthquakes"],ingestion_tasks["ingest--jacopoferretti-big-eartquakes-1900-1999-dataset"]] >> eartquake_cleaning
     ingestion_tasks["ingest--harshalhonde-tsunami-events-dataset-1900-present"] >> tsunami_cleaning
     ingestion_tasks["ingest--mexwell-significant-volcanic-eruption-database"] >> volcano_cleaning
     ingestion_tasks["ingest--kazushiadachi-global-landslide-data"] >> landslide_cleaning
@@ -64,7 +71,8 @@ with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule
 
     galax_modelisation>> data_quality_check
 
-    [cnn_fire_model,model_regression] >> success
+    [cnn_fire_model,model_regression] >> check_mlflow_bucket >> [producer_task,consumer_task]
+
 
     #check notebook 
 

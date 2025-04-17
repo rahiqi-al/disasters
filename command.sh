@@ -253,3 +253,79 @@ and the LinearRegression model predicts Fire Weather Index from features. All ne
 
 
 if not explicitly set, the artifact URI follows the tracking URI (file:/mlflow/mlruns)
+
+
+
+
+
+-Solution to jars :
+ ==>Create Local Folder Outside Project:
+      mkdir -p ~/.spark-jars/cache ~/.spark-jars/jars
+      sudo chown -R 1001:1001 ~/.spark-jars
+ ==>Download JARs to Local Folder Run once to download JARs:
+      docker run --rm -v $HOME/.spark-jars:/spark-jars bitnami/spark:3.5.1 bash -c "spark-submit --master local --packages org.apache.hadoop:hadoop-aws:3.3.4,org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0,org.projectnessie.nessie-integrations:nessie-spark-extensions-3.5_2.12:0.74.0,com.amazon.deequ:deequ:2.0.7-spark-3.5 --conf spark.jars.ivy=/spark-jars /tmp/dummy.py && mv /spark-jars/*.jar /spark-jars/jars/ 2>/dev/null || true"
+      docker run --rm -v $HOME/.spark-jars:/spark-jars bitnami/spark:3.5.1 bash -c "spark-submit --master local --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 --conf spark.jars.ivy=/spark-jars /tmp/dummy.py && mv /spark-jars/*.jar /spark-jars/jars/ 2>/dev/null || true"
+ ==>Update docker-compose.yml Mount ~/.spark-jars to /opt/bitnami/spark/.ivy2
+ ==>Verify:
+      ls -R ~/.spark-jars/jars
+
+ ""(Spark will automatically use the JARs in ~/.spark-jars (mounted to /opt/bitnami/spark/.ivy2) without downloading. The --packages command checks the cache first and finds the pre-downloaded JARs. No re-downloads occur after the initial setup)""
+
+
+-response.raise_for_status() raises an HTTPError if the HTTP request returned an unsuccessful status code (like 4xx or 5xx). If the request was successful (2xx), it does nothing.
+
+
+-rain data (rain.1h) is not always missing in OpenWeatherMap API responses. It’s only absent when no precipitation occurred in the last hour. For Chefchaouen, where rainfall is often low, Rain: 0.0 is a valid default and usually accurate
+ i tested this using postman (https://api.openweathermap.org/data/2.5/weather?q=casablanca,MA&appid=040fc17d4596ec7b20a406eb4a96eb8d&units=metric)
+
+
+
+
+
+for producer we need to install confluent_kafka (pip install confluent_kafka )
+
+
+
+
+
+Créer_topic
+docker exec -it kafka kafka-topics --create --topic weather_data --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+Publier_message_topic
+docker exec -it kafka kafka-console-producer --broker-list localhost:9092 --topic weather_data
+
+Consommer_messages_topic
+docker exec -it kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic weather_data --from-beginning
+
+
+also to run the consumer inside the spark container i need to install this (pip install  pymongo  cassandra-driver)
+
+
+
+
+docker exec -it mongodb mongosh
+use weatherDB
+db.weather_data.find().pretty()
+db.weather_data.drop()
+
+
+docker exec -it cassandra cqlsh
+USE weather_keyspace;
+SELECT * FROM weather_data;
+
+
+
+we need to innstall inside airflow container (pip install apache-airflow-providers-amazon boto3) so we could use S3keysensor
+
+
+
+-Set Up MinIO Connection in Airflow:
+  Go to Airflow UI → Admin → Connections → Add:
+  Conn Id: minio_conn
+  Conn Type: Amazon Web Services
+  Extra:
+        {
+          "aws_access_key_id": "ali",
+          "aws_secret_access_key": "aliali123",
+          "endpoint_url": "http://minio:9000"
+        }

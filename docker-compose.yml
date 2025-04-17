@@ -149,6 +149,7 @@ services:
       - "7077:7077"
       - "8081:8080"  # UI on 8081 to avoid Airflow conflict
     volumes:
+      - ~/.spark-jars:/opt/bitnami/spark/.ivy2
       - .:/project  # Mount entire project directory
       - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Shared package volume
     restart: unless-stopped
@@ -167,6 +168,7 @@ services:
     depends_on:
       - spark-master
     volumes:
+      - ~/.spark-jars:/opt/bitnami/spark/.ivy2
       - .:/project  # Mount entire project directory
       - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Same volume
     restart: unless-stopped
@@ -185,6 +187,7 @@ services:
     depends_on:
       - spark-master
     volumes:
+      - ~/.spark-jars:/opt/bitnami/spark/.ivy2
       - .:/project  # Mount entire project directory
       - spark-libs:/opt/bitnami/python/lib/python3.11/site-packages  # Same volume
     restart: unless-stopped

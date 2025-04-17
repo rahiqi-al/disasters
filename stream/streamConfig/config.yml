@@ -1,0 +1,6 @@
+WEATHER_API_URL : "http://api.openweathermap.org/data/2.5/weather"
+TOPIC_NAME : "weather_data"
+PRODUCER_CONFIG : {'bootstrap.servers': 'kafka:9092'}
+SERVER : "kafka:9092"
+MONGODB_CONNECTION : "mongodb://mongodb:27017"
+CASSANDRA_HOST : "cassandra"
