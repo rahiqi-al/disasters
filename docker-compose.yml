@@ -97,6 +97,7 @@ services:
       - PYTHONPATH=/project
     ports:
       - "8080:8080"
+      - "8501:8501"
     volumes:
       - airflow_mlflow:/mlflow/mlruns  # Named volume
       - airflow-libs:/home/airflow/.local/lib/python3.8/site-packages  # Named volume for libraries

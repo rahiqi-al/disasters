@@ -57,6 +57,8 @@ with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule
 
     check_mlflow_bucket = S3KeySensor(task_id='check_mlflow_bucket',bucket_key='*',bucket_name='mlflow', aws_conn_id='minio_conn',wildcard_match=True,poke_interval=30,timeout=300,)
 
+    dashboard = BashOperator(task_id='dashboard',bash_command='python -m streamlit run /project/stream/dashbord.py --server.port 8501 --server.address 0.0.0.0')
+
 
 
     check_kaggle_api>>list(ingestion_tasks.values())
@@ -71,7 +73,7 @@ with DAG('disasters', default_args=args, start_date=datetime(2025,1,1), schedule
 
     galax_modelisation>> data_quality_check
 
-    [cnn_fire_model,model_regression] >> check_mlflow_bucket >> [producer_task,consumer_task]
+    [cnn_fire_model,model_regression] >> check_mlflow_bucket >> [producer_task,consumer_task,dashboard]
 
 
     #check notebook 

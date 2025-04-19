@@ -85,7 +85,10 @@ spark_submit:
 
 
 ---------------------------------------------------------
-python -m mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 5000
+python -m mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 8501
+
+
+the MLflow server is the Tracking Server that hosts the backend  and is accessible via the MLflow UI
 ---------------------------------------------------------
 
 
@@ -157,8 +160,7 @@ python -m mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --por
 
 
 
-mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 5000
-
+python -m mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 8501
 
 
 
@@ -171,7 +173,7 @@ mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 5000
 │   │   │   │   ├── MLmodel
 │   │   │   │   ├── model.pkl
 │   │   │   │   ├── conda.yaml
-│   │   │   │   ├── python_model.pkl
+│   │   │   │   ├── python_env.yaml
 │   │   │   │   ├── requirements.txt
 │   │   │   ├── scaler
 │   │   │   │   ├── scaler.pkl
@@ -188,24 +190,33 @@ mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 5000
 │   │   ├── meta.yaml
 ├── <experiment_id_2> (e.g., 987654321098765432, cnn_fire_prediction)
 │   ├── meta.yaml
-│   ├── <run_id_2> (e.g., <new_run_id>)
+│   ├── <run_id_2> (e.g., d6b604a2f55b4498b2edfdcdbc476965)
 │   │   ├── artifacts
 │   │   │   ├── model
 │   │   │   │   ├── MLmodel
-│   │   │   │   ├── model.pth
+│   │   │   │   ├── data
+│   │   │   │   │   ├── model
+│   │   │   │   │   │   ├── assets
+│   │   │   │   │   │   ├── fingerprint.pb
+│   │   │   │   │   │   ├── keras_metadata.pb
+│   │   │   │   │   │   ├── saved_model.pb
+│   │   │   │   │   │   ├── variables
 │   │   │   │   ├── conda.yaml
+│   │   │   │   ├── python_env.yaml
 │   │   │   │   ├── requirements.txt
 │   │   ├── metrics
 │   │   │   ├── accuracy
-│   │   │   ├── loss
+│   │   │   ├── precision
+│   │   │   ├── recall
 │   │   ├── params
-│   │   │   ├── learning_rate
+│   │   │   ├── train_size
+│   │   │   ├── val_size
 │   │   │   ├── epochs
 │   │   ├── tags
 │   │   │   ├── mlflow.runName
 │   │   │   ├── mlflow.source.type
 │   │   ├── meta.yaml
-├── models
+├── .models
 │   ├── LinearRegressionModel
 │   │   ├── meta.yaml
 │   │   ├── version-1
@@ -214,15 +225,6 @@ mlflow ui --backend-store-uri file:/mlflow/mlruns --host 0.0.0.0 --port 5000
 │   │   ├── meta.yaml
 │   │   ├── version-1
 │   │   │   ├── meta.yaml
-
-
-
-mlflow/
-├── <run_id_1> (e.g., 669b4312b20a479195e2b7c89ea169fd)
-│   ├── model.pkl
-│   ├── scaler.pkl
-├── <run_id_2> (e.g., <new_run_id>)
-│   ├── model.pth
 
 
 How to tell models apart in MinIO mlflow bucket:
