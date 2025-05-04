@@ -211,6 +211,21 @@ services:
     networks:
       - projet_network
 
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    ports:
+      - "1880:1880"
+    volumes:
+      - node_red_data:/data
+    restart: unless-stopped
+    networks:
+      - projet_network
+    depends_on:
+      - kafka
+      - mongodb
+      - airflow
+
 networks:
   projet_network:
     driver: bridge
@@ -226,3 +241,4 @@ volumes:
   spark-libs:  # New  volume for Spark packages
   airflow_mlflow:  
   superset_data:
+  node_red_data:

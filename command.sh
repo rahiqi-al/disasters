@@ -30,7 +30,7 @@ spark : http://localhost:8081/
 airflow : http://localhost:8080/home
 dremio : http://loca01lhost:9047/
 minio : http://localhost:9001/
-
+node-red : http://localhost:1880
 
 # since we used shared volumes no need to install in all of them just one is enough cause it will be mounted to all of them
 """
