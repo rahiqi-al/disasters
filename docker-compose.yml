@@ -12,7 +12,7 @@ services:
       - projet_network
 
   dremio:
-    image: dremio/dremio-oss:latest
+    image: dremio/dremio-oss:25.2.0
     container_name: dremio
     ports:
       - "9047:9047"   # Web UI
